@@ -52,15 +52,15 @@ export async function loadArticles() {
   }));
 }
 
-// Headline numbers that the free home page already shows, computed the same way the home page does:
-// real cap = sum of market caps of the real top-500 list, BTC dominance = BTC / real cap,
-// longs vs shorts = latest account ratio when available, otherwise ratio / (1 + ratio).
+// Headline numbers that the free home page already shows.
+// realcryptocap.com returns the top 500 only to its own pages; outside callers such as this
+// extension get the top 50 (and a total capped to those 50). So "real cap" is taken from the
+// site's own definition: reported market cap minus the excluded stablecoins, wrapped and tokenized assets.
 export async function loadStats() {
-  const [fg, rm, dv, all] = await Promise.allSettled([
+  const [fg, rm, dv] = await Promise.allSettled([
     getJSON('/api/market-data?section=fearGreed'),
     getJSON('/api/market-data?section=reportedMarket'),
     getJSON('/api/market-data?section=derivativesPulse'),
-    getJSON('/api/cg?topCoins=1&limit=500'),
   ]);
   const s = {};
   if (fg.status === 'fulfilled' && fg.value.latest) {
@@ -70,16 +70,7 @@ export async function loadStats() {
   if (rm.status === 'fulfilled') {
     s.reportedCap = rm.value.reportedMarketCapUsd;
     s.excludedCap = rm.value.excludedMarketCapUsd;
-  }
-  if (all.status === 'fulfilled') {
-    // Only the aggregate is used here; individual coins beyond the top 50 are never displayed.
-    const list = all.value.coins || [];
-    const sum = list.reduce((a, c) => a + (c.market_cap || 0), 0);
-    const btc = list.find((c) => c.id === 'bitcoin');
-    if (sum > 0) {
-      s.realCap = sum;
-      if (btc && btc.market_cap) s.btcDominance = (btc.market_cap / sum) * 100;
-    }
+    if (s.reportedCap && s.excludedCap) s.realCap = s.reportedCap - s.excludedCap;
   }
   if (dv.status === 'fulfilled') {
     const series = Array.isArray(dv.value.longShort24h) ? dv.value.longShort24h : [];

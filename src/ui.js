@@ -35,7 +35,6 @@ function tickerHTML() {
   if (s.reportedCap) stats.push(`<button class="st" data-ask="Explain real vs reported market cap">Reported <b>$${fmtBig(s.reportedCap)}</b></button>`);
   if (s.fearGreed != null) stats.push(`<button class="st" data-ask="Is the market fearful?">Fear &amp; Greed <b class="${s.fearGreed < 45 ? 'dn' : s.fearGreed > 55 ? 'up' : ''}">${s.fearGreed} ${esc(s.fearGreedLabel)}</b></button>`);
   if (s.longPct) stats.push(`<button class="st" data-ask="What do longs vs shorts tell us?">Longs/Shorts <b><span class="up">${s.longPct.toFixed(1)}%</span> / <span class="dn">${s.shortPct.toFixed(1)}%</span></b></button>`);
-  if (s.btcDominance) stats.push(`<button class="st" data-ask="What is BTC dominance?">BTC dom. <b>${s.btcDominance.toFixed(1)}%</b></button>`);
   const items = D.news.slice(0, 12);
   let html = stats.join('') + (stats.length ? '<span class="sep">|</span>' : '');
   D.coins.forEach((c, i) => {
