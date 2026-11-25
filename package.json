@@ -1,0 +1,18 @@
+{
+  "name": "realcryptocap-extension",
+  "version": "0.1.0",
+  "private": false,
+  "description": "RealCryptoCap: scrolling crypto ticker, headline summaries and an AI chat, powered by Firebase AI Logic hybrid inference (on-device first, cloud fallback).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "zip": "node build.mjs && cd dist && zip -r ../realcryptocap-extension.zip . -x '*.map'"
+  },
+  "dependencies": {
+    "firebase": "^13.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

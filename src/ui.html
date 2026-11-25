@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RealCryptoCap</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<div id="app" class="bottom">
+  <div id="panels">
+    <section id="details" class="pane"></section>
+    <section id="chat" class="pane">
+      <button class="x" data-close="chat" title="Close">&#x2715;</button>
+      <h3>Ask about crypto <span id="engine" class="badge" hidden></span></h3>
+      <div class="chips">
+        <span data-ask="Summarize today's headlines">Today's headlines</span>
+        <span data-ask="Analyze BTC">Analyze BTC</span>
+        <span data-ask="Is the market fearful?">Market mood</span>
+        <span data-ask="Explain real vs reported market cap">Real vs reported cap</span>
+      </div>
+      <div id="msgs"></div>
+      <form id="chatForm"><input id="q" autocomplete="off" placeholder="Ask about a top-50 coin or today's news..."><button class="primary" type="submit">Send</button></form>
+    </section>
+  </div>
+  <div id="bar">
+    <button id="brand" title="RealCryptoCap settings"><img src="icons/32.png" alt="RealCryptoCap" width="22" height="22"></button>
+    <div id="scroll"><div id="track"></div></div>
+    <div id="controls">
+      <div class="spd" title="Scroll speed">
+        <button id="slower" aria-label="Slower">&minus;</button><span id="spdLabel">1x</span><button id="faster" aria-label="Faster">+</button>
+        <button id="pause" aria-label="Pause or play">&#10074;&#10074;</button>
+      </div>
+      <button id="chatBtn" class="primary">&#128172; AI chat</button>
+      <button id="hide" title="Hide the bar">Hide &#9662;</button>
+    </div>
+  </div>
+  <div id="settings" hidden>
+    <h4>RealCryptoCap settings</h4>
+    <label>Show<select id="setMode"><option value="both">Ticker + AI chat</option><option value="ticker">Ticker only</option><option value="chat">AI chat only</option></select></label>
+    <label>Position<select id="setPos"><option value="bottom">Footer (bottom of page)</option><option value="top">Header (top of page)</option></select></label>
+    <div class="note">Click the toolbar icon to show or hide the bar on a page.</div>
+    <div id="deviceBox" class="note"><button id="enableDevice">Enable on-device AI</button> <span id="deviceStatus"></span></div>
+    <button id="settingsDone" class="primary">Done</button>
+  </div>
+</div>
+<script src="ui.js"></script>
+</body>
+</html>
