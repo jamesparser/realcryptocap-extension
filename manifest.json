@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "RealCryptoCap",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Scrolling top-50 crypto prices and headlines with an AI chat. Click the icon to show or hide the bar on the current page.",
   "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
   "action": { "default_title": "RealCryptoCap: show or hide the bar", "default_icon": { "16": "icons/16.png", "32": "icons/32.png" } },
