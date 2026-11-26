@@ -21,6 +21,9 @@ initializeAppCheck(app, {
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 const model = getGenerativeModel(ai, { mode: InferenceMode.PREFER_ON_DEVICE });
 
+export const SUMMARY_LABEL = 'AI summary';
+export const HAS_DEVICE = true;
+
 export async function prepareOnDevice(onProgress) {
   // Must run after a user gesture. Starts the Gemini Nano download if it is not on the device yet.
   try { await model.initializeDeviceModel(onProgress); return true; } catch (e) { console.warn('on-device init', e); return false; }

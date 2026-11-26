@@ -76,3 +76,7 @@ Market data is informational only and not financial advice.
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Store edition
+
+`STORE=1 OUT_DIR=dist-store node build.mjs` builds the Chrome Web Store edition. It swaps `src/ai.js` (Firebase AI Logic hybrid inference, used for the hackathon build) for `src/ai-rcc.js`, which asks the RealCryptoCap assistant at realcryptocap.com instead, so no keys or tokens are shipped in the extension. Coin and headline summaries in that edition are built from the data on screen and never use up the free daily AI questions. See `PRIVACY.md`.

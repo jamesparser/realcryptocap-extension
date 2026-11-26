@@ -1,5 +1,5 @@
 import { loadCoins, loadNews, loadArticles, loadStats, fmtPrice, fmtBig, SITE } from './data.js';
-import { summarizeNews, summarizeCoin, chat, prepareOnDevice } from './ai.js';
+import { summarizeNews, summarizeCoin, chat, prepareOnDevice, SUMMARY_LABEL, HAS_DEVICE } from './ai.js';
 import { findUntracked, notTrackedMessage } from './guard.js';
 
 const $ = (id) => document.getElementById(id);
@@ -81,28 +81,28 @@ async function showCoin(i) {
   const up = (c.change24h || 0) >= 0;
   $('details').innerHTML = `<button class="x" data-close="details">&#x2715;</button><h3>${esc(c.name)} (${esc(c.symbol)}) <span class="dim">#${c.rank}</span></h3>
     <div class="kv"><div><b>$${fmtPrice(c.price)}</b>price</div><div><b class="${up ? 'up' : 'dn'}">${(c.change24h || 0).toFixed(2)}%</b>24h</div><div><b>$${fmtBig(c.marketCap)}</b>market cap</div><div><b>$${fmtBig(c.volume)}</b>24h volume</div><div><b>$${fmtPrice(c.low)} - $${fmtPrice(c.high)}</b>24h range</div></div>
-    <div class="sum" id="sum"><b>AI summary</b> <span class="dim">${S.mode === 'ticker' ? 'AI is off in ticker-only mode' : 'thinking...'}</span></div>
+    <div class="sum" id="sum"><b>${SUMMARY_LABEL}</b> <span class="dim">${S.mode === 'ticker' ? 'AI is off in ticker-only mode' : 'thinking...'}</span></div>
     <p>${S.mode !== 'ticker' ? `<button class="primary" data-ask="Why is ${esc(c.symbol)} moving?">Ask AI about ${esc(c.symbol)}</button> ` : ''}<a href="${esc(c.url)}" target="_blank" rel="noopener">View on realcryptocap.com &#8599;</a></p>`;
   openPane('details');
   if (S.mode === 'ticker') return;
   const key = 'coin:' + c.id + ':' + Math.round(c.price * 100);
   try {
     const r = cache.get(key) || (cache.set(key, await summarizeCoin(c, D)), cache.get(key));
-    $('sum').innerHTML = `<b>AI summary</b>${badge(r.source)}<br>${esc(r.text)}`;
-  } catch (e) { $('sum').innerHTML = `<b>AI summary</b><br><span class="dim">Unavailable right now (${esc(e.message || e)}).</span>`; }
+    $('sum').innerHTML = `<b>${SUMMARY_LABEL}</b>${badge(r.source)}<br>${esc(r.text)}`;
+  } catch (e) { $('sum').innerHTML = `<b>${SUMMARY_LABEL}</b><br><span class="dim">Unavailable right now (${esc(e.message || e)}).</span>`; }
 }
 async function showNews(n) {
   const item = D.news[n];
   $('details').innerHTML = `<button class="x" data-close="details">&#x2715;</button><h3>${esc(item.title)}</h3>
     <div class="kv"><div><b>${esc(item.source)}</b>source</div><div><b>${esc(item.date)}</b>date</div></div>
-    <div class="sum" id="sum"><b>AI summary</b> <span class="dim">${S.mode === 'ticker' ? 'AI is off in ticker-only mode' : 'thinking...'}</span></div>
+    <div class="sum" id="sum"><b>${SUMMARY_LABEL}</b> <span class="dim">${S.mode === 'ticker' ? 'AI is off in ticker-only mode' : 'thinking...'}</span></div>
     <p>${S.mode !== 'ticker' ? `<button class="primary" data-ask="What does this headline mean for the market: ${esc(item.title)}">Ask AI about this</button> ` : ''}<a href="${esc(item.url)}" target="_blank" rel="noopener">Read the article at ${esc(item.source)} &#8599;</a></p>`;
   openPane('details');
   if (S.mode === 'ticker') return;
   try {
     const r = cache.get(item.id) || (cache.set(item.id, await summarizeNews(item)), cache.get(item.id));
-    $('sum').innerHTML = `<b>AI summary</b>${badge(r.source)}<br>${esc(r.text)}`;
-  } catch (e) { $('sum').innerHTML = `<b>AI summary</b><br><span class="dim">Unavailable right now (${esc(e.message || e)}).</span>`; }
+    $('sum').innerHTML = `<b>${SUMMARY_LABEL}</b>${badge(r.source)}<br>${esc(r.text)}`;
+  } catch (e) { $('sum').innerHTML = `<b>${SUMMARY_LABEL}</b><br><span class="dim">Unavailable right now (${esc(e.message || e)}).</span>`; }
 }
 
 // ---------- chat ----------
@@ -127,8 +127,9 @@ async function ask(text) {
   try {
     const r = await chat(text, D.history, D);
     D.history.push({ role: 'user', text }, { role: 'assistant', text: r.text });
-    pending.innerHTML = linkify(r.text) + (r.source === 'guard' ? '' : badge(r.source));
-    if (r.source !== 'guard') { $('engine').hidden = false; $('engine').textContent = r.source; $('engine').className = 'badge' + (r.source === 'cloud' ? ' cloud' : ''); }
+    pending.innerHTML = linkify(r.text) + (r.source === 'guard' || r.left != null ? '' : badge(r.source));
+    if (r.left != null) { $('engine').hidden = false; $('engine').textContent = `${r.left} of ${r.limit} free questions left today`; $('engine').className = 'badge'; }
+    else if (r.source !== 'guard') { $('engine').hidden = false; $('engine').textContent = r.source; $('engine').className = 'badge' + (r.source === 'cloud' ? ' cloud' : ''); }
   } catch (e) {
     pending.innerHTML = `<span class="dim">Sorry, the AI is unavailable right now (${esc(e.message || e)}).</span>`;
   }
@@ -166,6 +167,7 @@ $('pause').onclick = () => { S.paused = !S.paused; updateSpeedUI(); saveSettings
 $('scroll').addEventListener('mouseenter', () => (hover = true));
 $('scroll').addEventListener('mouseleave', () => (hover = false));
 $('chatForm').onsubmit = (e) => { e.preventDefault(); ask($('q').value); };
+if (!HAS_DEVICE) $('deviceBox').hidden = true;
 $('enableDevice').onclick = async () => {
   $('deviceStatus').textContent = 'starting...';
   const ok = await prepareOnDevice((p) => ($('deviceStatus').textContent = `downloading ${Math.round(p * 100)}%`));
